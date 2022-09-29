@@ -23,7 +23,7 @@ let quoteNo = 0;
 let timer = null;
 
 let quotes_array = [
-    "Don't be indifferent about any random idea that occurs to you, because each and every idea is for a particular purpose. it may not be beneficial to you, but can be what others are craving for",
+    "Don't be indifferent about any random idea that occurs to you, because each and every idea is for a particular purpose. It may not be beneficial to you, but can be what others are craving for",
     "Think of life as a giant, fat cat you're in charge of. Sometimes you can control it, but other times, it's going to do what it wants and you have to roll with it. And sometimes you can do everything - everything you're s'posed to do- and it'll still shred all the things you hold dear... The only thing you can really do with life is rub its belly and prepare for the worst.",
     "We are face to face with our destiny and we must meet it with high and resolute courage. For us is the life of action, of strenuous performance of duty; let us live in the harness, striving mightily; let us rather run the risk of wearing out than rusting out.",
     "A king does not abide within his tent while his men bleed and die upon the field. A king does not dine while his men go hungry, nor sleep when they stand at watch upon the wall. A king does not command his men's loyalty through fear nor purchase it with gold; he earns their love by the sweat of his own back and the pains he endures for their sake. That which comprises the harshest burden, a king lifts first and sets down last. A king does not require service of those he leads but provides it to them...A king does not expend his substance to enslave men, but by his conduct and example makes them free.",
@@ -40,21 +40,123 @@ let quotes_array = [
     "Resistance is experienced as fear; the degree of fear equates to the strength of Resistance. Therefore the more fear we feel about a specific enterprise, the more certain we can be that that enterprise is important to us and to the growth of our soul. That's why we feel so much Resistance. If it meant nothing to us, there'd be no Resistance."
 ];
 
+function processCurrentText() {
+
+    curr_input = input_area.value;
+    curr_input_array = curr_input.split('');
+
+    characterTyped++;
+
+    errors = 0;
+
+    let quoteSpanArray = quote_text.querySelectorAll('span');
+    quoteSpanArray.forEach((char, index) => {
+        let typedChar = curr_input_array[index]
+
+        if (typedChar == null) {
+            char.classList.remove('correct_char');
+            char.classList.remove('incorrect_char');
+
+            // correct character
+        } else if (typedChar === char.innerText) {
+            char.classList.add('correct_char');
+            char.classList.remove('incorrect_char');
+        } else {
+            char.classList.add('incorrect_char');
+            char.classList.remove('correct_char');
+
+            // increment number of errors
+            errors++;
+        }
+    });
+
+    error_text.textContent = total_errors + errors;
+
+    let correctCharacters = (characterTyped - (total_errors + errors));
+    let accuracyVal = ((correctCharacters / characterTyped) * 100);
+    accuracy_text.textContent = Math.round(accuracyVal);
+
+    if (curr_input.length == current_quote.length) {
+        updateQuote();
+
+        // update total errors
+        total_errors += errors;
+
+        input_area.value = "";
+    }
+}
+
+
 function updateQuote() {
     quote_text.textContent = null;
     current_quote = quotes_array[quoteNo];
 
-    // separate each character and make an element
-    // out of each of them to individually style them
     current_quote.split('').forEach(char => {
         const charSpan = document.createElement('span')
         charSpan.innerText = char
         quote_text.appendChild(charSpan)
     })
 
-    // roll over to the first quote
     if (quoteNo < quotes_array.length - 1)
         quoteNo++;
     else
         quoteNo = 0;
+}
+
+function startGame() {
+
+    resetValues();
+    updateQuote();
+
+    // clear old and start a new timer
+    clearInterval(timer);
+    timer = setInterval(updateTimer, 1000);
+}
+
+function resetValues() {
+    timeLeft = TIME_LIMIT;
+    timeElapsed = 0;
+    errors = 0;
+    total_errors = 0;
+    accuracy = 0;
+    characterTyped = 0;
+    quoteNo = 0;
+    input_area.disabled = false;
+
+    input_area.value = "";
+    quote_text.textContent = 'Click on the area below to start the game.';
+    accuracy_text.textContent = 100;
+    timer_text.textContent = timeLeft + 's';
+    error_text.textContent = 0;
+    restart_btn.style.display = "none";
+    cpm_group.style.display = "none";
+    wpm_group.style.display = "none";
+}
+
+function updateTimer() {
+    if (timeLeft > 0) {
+        timeLeft--;
+        timeElapsed++;
+        timer_text.textContent = timeLeft + "s";
+    } else {
+        finishGame();
+    }
+}
+
+function finishGame() {
+    clearInterval(timer);
+
+    input_area.disabled = true;
+    quote_text.textContent = "Click on restart to start a new game.";
+
+    restart_btn.style.display = "block";
+
+    cpm = Math.round(((characterTyped / timeElapsed) * 60));
+    wpm = Math.round((((characterTyped / 5) / timeElapsed) * 60));
+
+    cpm_text.textContent = cpm;
+    wpm_text.textContent = wpm;
+
+    cpm_group.style.display = "block";
+    wpm_group.style.display = "block";
 }
