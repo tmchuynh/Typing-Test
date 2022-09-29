@@ -39,3 +39,22 @@ let quotes_array = [
     "We fear discovering that we are more than we think we are. More than our parents/children/teachers think we are. We fear that we actually possess the talent that our still, small voice tells us. That we actually have the guts, the perseverance, the capacity. We fear that we truly can steer our ship, plant our flag, reach our Promised Land. We fear this because, if it’s true, then we become estranged from all we know. We pass through a membrane. We become monsters and monstrous.",
     "Resistance is experienced as fear; the degree of fear equates to the strength of Resistance. Therefore the more fear we feel about a specific enterprise, the more certain we can be that that enterprise is important to us and to the growth of our soul. That's why we feel so much Resistance. If it meant nothing to us, there'd be no Resistance."
 ];
+
+function updateQuote() {
+    quote_text.textContent = null;
+    current_quote = quotes_array[quoteNo];
+
+    // separate each character and make an element
+    // out of each of them to individually style them
+    current_quote.split('').forEach(char => {
+        const charSpan = document.createElement('span')
+        charSpan.innerText = char
+        quote_text.appendChild(charSpan)
+    })
+
+    // roll over to the first quote
+    if (quoteNo < quotes_array.length - 1)
+        quoteNo++;
+    else
+        quoteNo = 0;
+}
